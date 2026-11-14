@@ -1,0 +1,159 @@
+<!DOCTYPE html><html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>NEXUS AI FOOTBALL OFFICE 2.0</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#070b16;--p:#0f1830;--p2:#14204a;--ln:#27407a;--tx:#dbe6ff;--mu:#8195c4;--c:#00e5ff;--m:#ff2bd6;--g:#39ff88;--y:#ffd13a;--r:#ff4d6d;color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg) radial-gradient(circle at 20% 0,#13265a55,transparent 50%),linear-gradient(#27407a18 1px,transparent 1px) 0 0/100% 32px;color:var(--tx);font:14px/1.5 'Noto Sans Thai','Sarabun',Tahoma,sans-serif}
+header{padding:14px 16px;border-bottom:1px solid var(--ln);display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+h1{margin:0;font-size:18px;letter-spacing:1px;color:var(--c);text-shadow:0 0 12px var(--c)}h1 small{color:var(--m)}
+.clock{color:var(--mu);font-size:12px}
+nav{display:flex;gap:6px;overflow-x:auto;padding:10px 16px}
+nav button,.btn{background:var(--p);border:1px solid var(--ln);color:var(--tx);padding:7px 12px;border-radius:8px;cursor:pointer;font:inherit;white-space:nowrap}
+nav button.on{border-color:var(--c);color:var(--c);box-shadow:0 0 10px #00e5ff44}
+.btn:hover{border-color:var(--c)}.btn.pri{background:linear-gradient(90deg,#00b8d4,#a020f0);border:0;font-weight:700}
+.bar{display:flex;flex-wrap:wrap;gap:8px;padding:0 16px 10px}
+main{padding:0 16px 40px}
+.warn{background:#ffd13a15;border:1px solid #ffd13a66;color:var(--y);padding:8px 12px;border-radius:8px;margin-bottom:12px;font-size:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
+.room{background:var(--p);border:1px solid var(--ln);border-radius:12px;padding:14px;cursor:pointer;position:relative;transform:skewY(-1.5deg);transition:.2s}
+.room:hover{border-color:var(--c);box-shadow:0 0 16px #00e5ff44}
+.room>*{transform:skewY(1.5deg)}.av{font-size:34px}.rn{color:var(--mu);font-size:11px;text-transform:uppercase}
+.st{display:inline-block;font-size:11px;padding:1px 8px;border-radius:99px;border:1px solid var(--mu);margin:4px 0}
+.st.IDLE{color:var(--mu)}.st.SCANNING,.st.ANALYZING{color:var(--c);border-color:var(--c)}.st.VERIFYING{color:var(--y);border-color:var(--y)}.st.TEAM{color:var(--m);border-color:var(--m)}.st.REPORTING{color:#9b8cff;border-color:#9b8cff}.st.COMPLETED{color:var(--g);border-color:var(--g)}
+.pg{height:6px;background:#0a1226;border-radius:4px;overflow:hidden}.pg i{display:block;height:100%;background:linear-gradient(90deg,var(--c),var(--m));transition:width .4s}
+.card{background:var(--p);border:1px solid var(--ln);border-radius:12px;padding:14px;margin-bottom:12px}
+.card h3{margin:0 0 8px;color:var(--c);font-size:15px}
+.tw{overflow-x:auto}table{border-collapse:collapse;width:100%;min-width:560px}th,td{border-bottom:1px solid var(--ln);padding:6px 8px;text-align:left;vertical-align:top}th{color:var(--mu);font-weight:600;font-size:12px}
+.f{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+label{font-size:11px;color:var(--mu);display:block}input,select{width:100%;background:#0a1226;border:1px solid var(--ln);color:var(--tx);border-radius:6px;padding:6px;font:inherit}
+.tag{padding:1px 8px;border-radius:6px;font-size:12px;font-weight:700}.A{background:#39ff8822;color:var(--g)}.B{background:#00e5ff22;color:var(--c)}.C{background:#ffd13a22;color:var(--y)}.D{background:#ff4d6d22;color:var(--r)}
+.log{font-size:12px;color:var(--mu);max-height:160px;overflow:auto;white-space:pre-wrap}
+#md{position:fixed;inset:0;background:#000a;display:none;align-items:center;justify-content:center;z-index:9;padding:16px}#md>div{max-width:480px;width:100%;max-height:85vh;overflow:auto}
+.rep h2{color:var(--m);font-size:15px;margin:16px 0 6px}
+</style></head><body>
+<header><h1>NEXUS AI FOOTBALL OFFICE <small>2.0</small></h1><div class="clock" id="clk"></div></header>
+<nav id="nav"></nav>
+<div class="bar"><button class="btn pri" onclick="daily()">▶ START DAILY ANALYSIS</button><button class="btn" onclick="doScan()">SCAN ALL FIXTURES</button><button class="btn" onclick="doMeet()">START AI MEETING</button><button class="btn" onclick="doVerify()">VERIFY ALL DATA</button><button class="btn" onclick="doRep()">GENERATE FINAL REPORT</button></div>
+<main id="main"></main><div id="md" onclick="if(event.target==this)this.style.display='none'"></div>
+<script>
+const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])),sl=t=>new Promise(r=>setTimeout(r,t)),cl=(x,a,b)=>Math.max(a,Math.min(b,x));
+const ld=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))||d}catch(e){return d}},sv=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}};
+let F=ld('nx_f',[]),H=ld('nx_h',[]),R=[],V='ov',REP=null,MEET=[];
+const AG=[
+{id:'view',n:'วิว (VIEW)',r:'CEO',room:'CEO Room',e:'👔',d:['ควบคุมทุกแผนก','สั่งสแกนโปรแกรม','ประเมินข้อเสนอและตัดสินใจ','คัดเลือก TOP SINGLE / STEP 3 / STEP 4','อนุมัติรายงานฉบับสุดท้าย']},
+{id:'phet',n:'เพชร (PHET)',r:'Football Analyst',room:'Football Analysis Room',e:'⚽',d:['วิเคราะห์ฟอร์ม 5 นัดล่าสุด','เปรียบเทียบความได้เปรียบ','ประเมินความน่าจะเป็นโดยประมาณ']},
+{id:'oat',n:'โอ๊ต (OAT)',r:'Odds Analyst',room:'Odds Analysis Room',e:'📈',d:['วิเคราะห์ราคา AH / O/U','คำนวณความน่าจะเป็นจากราคา','ประเมินความคุ้มค่าเทียบตลาด']},
+{id:'jbig',n:'เจบิ๊ก (JBIG)',r:'Risk & Verification',room:'Risk & Verification Room',e:'🛡️',d:['ตรวจนักเตะบาดเจ็บ/แบน','ตรวจ 11 ตัวจริง','ตรวจข้อมูลขัดแย้งและอายุราคา','สั่ง NO BET เมื่อจำเป็น']},
+{id:'rep',n:'REPORTING',r:'Reporting & Graphic',room:'Reporting & Graphic Room',e:'📊',d:['รวบรวมข้อมูลทุกแผนก','จัดอันดับคู่','สร้างรายงานภาษาไทย','ส่งให้ CEO ตรวจก่อนเผยแพร่']}];
+AG.forEach(a=>{a.st='IDLE';a.p=0;a.l=[]});
+const G=id=>AG.find(a=>a.id==id),now=()=>new Date().toLocaleString('th-TH',{timeZone:'Asia/Bangkok'});
+function setA(id,st,p,m){const a=G(id);a.st=st;a.p=p;if(m)a.l.push('['+new Date().toLocaleTimeString('th-TH',{timeZone:'Asia/Bangkok'})+'] '+m);draw()}
+const pts=s=>{s=(s||'').toUpperCase().replace(/[^WDL]/g,'');return s.length==5?[...s].reduce((a,c)=>a+(c=='W'?3:c=='D'?1:0),0):null};
+function ev(f){const m=[],a=pts(f.fp),b=pts(f.fo),o=parseFloat(f.odds);
+ if(a===null||b===null)m.push('ฟอร์ม 5 นัด');if(!(o>1))m.push('ราคา');if(!f.src)m.push('แหล่งข้อมูล');if(!f.pt)m.push('เวลาตรวจราคา');
+ if(m.length)return{f,no:true,total:null,grade:'NO BET',flags:['UNKNOWN: ขาด '+m.join(', ')]};
+ const e=(a-b)/15,form=cl(15+e*15,0,30),ip=1/o,ep=cl(.5+e*.25,.05,.95),val=ep-ip,price=cl(12.5+val*125,0,25),fl=[];
+ const ij=+f.ip||0,io=+f.io||0;let news=20-4*ij+Math.min(io,3);if(f.lu=='no'){news-=3;fl.push('ยังไม่ประกาศ 11 ตัวจริง')}else if(f.lu!='yes'){news-=2;fl.push('11 ตัวจริง: UNKNOWN')}
+ if(ij>=2)fl.push('ตัวหลักทีมที่เลือกเจ็บ/แบน '+ij+' คน');news=cl(news,0,20);
+ let risk=10,no=false;if(f.cf){risk=0;no=true;fl.push('CONFLICT: แหล่งข้อมูลขัดแย้ง — ต้องตรวจสอบใหม่')}
+ const age=(Date.now()-Date.parse(f.pt))/36e5;if(age>3){risk-=4;fl.push('ราคาตรวจเมื่อ '+Math.round(age)+' ชม.ก่อน (ไม่ใช่ราคาปัจจุบัน)')}
+ if(f.ko&&Date.parse(f.ko)<Date.now()){no=true;fl.push('เลยเวลาแข่งขันแล้ว')}
+ if(val<=0)fl.push('ราคาไม่คุ้มค่า (ค่าประมาณ ≤ ราคาตลาด)');
+ const agree=5*((e>0)+(val>0)+(news>=14&&!no));const t=Math.round(form+price+news+agree+cl(risk,0,10));
+ if(t<65)no=true;const g=no?'NO BET':t>=85?'STRONG CANDIDATE':t>=75?'GOOD CANDIDATE':'WATCHLIST';
+ return{f,a,b,form,ip,ep,val,price,news,agree,risk,total:t,grade:g,flags:fl,no:no||g=='WATCHLIST'}}
+const elig=()=>R.filter(r=>r.total!==null&&!r.no&&r.total>=75).sort((x,y)=>y.total-x.total);
+const nm=r=>esc(r.f.h+' vs '+r.f.a);
+async function doScan(){setA('view','SCANNING',10,'เริ่มสแกนโปรแกรม');await sl(500);
+ if(!F.length){setA('view','COMPLETED',100,'ไม่พบข้อมูลคู่แข่งขัน — ยังไม่ได้เชื่อมต่อแหล่งข้อมูลสด กรอกข้อมูลที่ MATCH SCANNER');return false}
+ setA('view','SCANNING',60,'พบ '+F.length+' คู่จากข้อมูลที่กรอก');await sl(500);setA('view','COMPLETED',100,'สแกนเสร็จ '+F.length+' คู่');return true}
+async function doAna(){R=F.map(ev);setA('phet','ANALYZING',30,'วิเคราะห์ฟอร์ม');setA('oat','ANALYZING',30,'วิเคราะห์ราคา');await sl(600);
+ setA('phet','COMPLETED',100,'วิเคราะห์ '+R.length+' คู่');setA('oat','COMPLETED',100,'คำนวณความคุ้มค่าเสร็จ')}
+async function doVerify(){if(!R.length)R=F.map(ev);setA('jbig','VERIFYING',30,'ตรวจข่าว/ข้อมูลขัดแย้ง/อายุราคา');await sl(700);
+ const nb=R.filter(r=>r.no).length;setA('jbig','COMPLETED',100,'ตรวจเสร็จ — NO BET/ไม่ผ่าน '+nb+' คู่ จาก '+R.length)}
+async function doMeet(){if(!R.length)R=F.map(ev);AG.forEach(a=>setA(a.id,'TEAM MEETING',50));const E=elig();
+ MEET=[['เพชร','เสนอคู่ที่ฟอร์มได้เปรียบ: '+(R.filter(r=>r.form>15).map(r=>r.f.h+' vs '+r.f.a).join(', ')||'ไม่มี')],
+ ['โอ๊ต','คู่ที่ราคาคุ้มค่า: '+(R.filter(r=>r.val>0).map(nm).map(s=>s.replace(/&amp;/g,'&')).join(', ')||'ไม่มี')],
+ ['เจบิ๊ก','ความเสี่ยง/NO BET: '+(R.filter(r=>r.no).map(r=>r.f.h+' vs '+r.f.a+' ('+r.flags[0]+')').join('; ')||'ไม่มี')],
+ ['REPORTING','สรุป: ผ่านเกณฑ์ '+E.length+' คู่ จากทั้งหมด '+R.length+' คู่; ข้อมูลขัดแย้ง '+R.filter(r=>r.f.cf).length+' คู่'],
+ ['วิว (CEO)',E.length?'อนุมัติ TOP SINGLE: '+E[0].f.h+' vs '+E[0].f.a+(E.length>=3?'; STEP 3 ได้':'; STEP 3 ไม่ครบ → ไม่ฝืนเลือก')+(E.length>=4?'; STEP 4 ได้':'; STEP 4 ไม่ครบ → ไม่ฝืนเลือก'):'ไม่มีคู่ผ่านเกณฑ์ → NO BET ทั้งหมด']];
+ await sl(900);AG.forEach(a=>setA(a.id,'COMPLETED',100));setA('view','COMPLETED',100,'ประชุมสรุปผล');V='meet';draw()}
+function tb(rows){return '<div class="tw"><table><tr><th>คู่</th><th>ตลาด / ราคา</th><th>เวลา</th><th>เหตุผล</th><th>คะแนน</th><th>ความน่าจะเป็นโดยประมาณ</th><th>ปัจจัยเสี่ยง</th></tr>'+rows.map(r=>'<tr><td>'+esc(r.f.pick)+'<br><small>'+nm(r)+'</small></td><td>'+esc(r.f.mk)+' @ '+esc(r.f.odds)+'<br><small>ราคาตรวจ '+esc((r.f.pt||'').replace('T',' '))+'</small></td><td>'+esc((r.f.ko||'UNKNOWN').replace('T',' '))+'</td><td>ฟอร์ม '+r.a+' vs '+r.b+' แต้ม/15; คุ้มค่า '+(r.val*100).toFixed(1)+'%; แหล่ง: '+esc(r.f.src)+'</td><td>'+r.total+'/100<br><small>'+r.grade+'</small></td><td>~'+Math.round(r.ep*100)+'% (ประมาณการ)</td><td>'+(esc(r.flags.join('; '))||'ไม่พบข้อกังวล')+'</td></tr>').join('')+'</table></div>'}
+async function doRep(){if(!R.length)R=F.map(ev);setA('rep','REPORTING',40,'รวบรวมข้อมูล');await sl(600);const E=elig(),demo=F.some(f=>f.src=='DEMO');
+ const sec=(t,b)=>'<h2>'+t+'</h2>'+b,pick=(n)=>E.length>=n?tb(E.slice(0,n)):'<p>NO BET — มีคู่ผ่านเกณฑ์ '+E.length+' คู่ ไม่ครบ '+n+' คู่ จึงไม่ฝืนเลือก</p>';
+ const nb=R.filter(r=>r.no);
+ REP={t:now(),h:'<div class="rep"><b style="font-size:16px">NEXUS AI FOOTBALL OFFICE — DAILY FOOTBALL REPORT</b><br>อัปเดต: '+now()+(demo?'<div class="warn">⚠ มีข้อมูล DEMO ไม่ใช่ข้อมูลจริง</div>':'')+
+ sec('SECTION 1: สรุปโปรแกรมฟุตบอลวันนี้',R.length?'<p>วิเคราะห์ '+R.length+' คู่ (เฉพาะข้อมูลที่กรอกเข้าระบบ): '+R.map(nm).join(', ')+'</p>':'<p>ไม่มีข้อมูลโปรแกรม (UNKNOWN)</p>')+
+ sec('SECTION 2: TOP SINGLE',E.length?tb([E[0]]):'<p>NO BET — ไม่มีคู่ผ่านเกณฑ์ ≥75 คะแนน</p>')+sec('SECTION 3: STEP 3',pick(3))+sec('SECTION 4: STEP 4',pick(4)+(E.length>=4?'<p>ความเสี่ยงรวมบิลสูงกว่าเดี่ยว — พิจารณาด้วยความระมัดระวัง</p>':''))+
+ sec('SECTION 5: INJURY & TEAM NEWS','<ul>'+R.map(r=>'<li>'+nm(r)+': เจ็บ/แบน ทีมเลือก '+esc(r.f.ip??'UNKNOWN')+' / คู่แข่ง '+esc(r.f.io??'UNKNOWN')+'; 11 ตัวจริง '+({yes:'ยืนยันแล้ว',no:'ยังไม่ประกาศ'}[r.f.lu]||'UNKNOWN')+'</li>').join('')+'</ul>')+
+ sec('SECTION 6: RISK REPORT',nb.length?'<ul>'+nb.map(r=>'<li><b>NO BET</b> '+nm(r)+' — '+esc(r.flags.join('; ')||'คะแนนต่ำกว่าเกณฑ์')+'</li>').join('')+'</ul>':'<p>ไม่มีคู่ NO BET</p>')+
+ sec('SECTION 7: CEO FINAL DECISION','<p>'+esc(MEET.length?MEET[4][1]:(E.length?'อนุมัติตามอันดับคะแนน':'NO BET'))+'</p><p><small>ไม่รับประกันผลการแข่งขัน ความน่าจะเป็นเป็นค่าประมาณจากแบบจำลองอย่างง่าย</small></p>')+
+ sec('SECTION 8: SOURCE & VERIFICATION','<ul>'+F.map(f=>'<li>'+esc(f.h+' vs '+f.a)+': '+esc(f.src||'UNKNOWN')+' — ตรวจราคาเมื่อ '+esc((f.pt||'UNKNOWN').replace('T',' '))+'</li>').join('')+'</ul><small>หมายเหตุ: ระบบไม่ได้ดึงข้อมูลสดจากอินเทอร์เน็ต ข้อมูลทั้งหมดมาจากผู้ใช้กรอก</small>')+'</div>'};
+ setA('rep','REPORTING',80,'สร้างรายงาน');await sl(400);setA('view','VERIFYING',80,'CEO ตรวจรายงาน');await sl(400);setA('view','COMPLETED',100,'อนุมัติรายงาน');setA('rep','COMPLETED',100,'ส่งรายงานแล้ว');
+ H.unshift({t:REP.t,h:REP.h});H=H.slice(0,30);sv('nx_h',H);V='rep';draw()}
+let busy=false;async function daily(){if(busy)return;busy=true;AG.forEach(a=>{a.l=[];setA(a.id,'IDLE',0)});
+ try{if(await doScan()){await doAna();await doVerify();await doMeet()}else{R=[];MEET=[]}await doRep()}finally{busy=false}}
+const G7=`ยูฟ่า เนชั่นส์ ลีก|โคโซโว|อิสราเอล|2100|0.5, 0.5/1
+ยูฟ่า เนชั่นส์ ลีก|นอร์เวย์|เวลส์|0000|1.5/2, 2
+ยูฟ่า เนชั่นส์ ลีก|จอร์เจีย|ฮังการี่|0000|เสมอ, 0/0.5
+ยูฟ่า เนชั่นส์ ลีก|โปรตุเกส|เดนมาร์ก|0245|1/1.5, 1
+ยูฟ่า เนชั่นส์ ลีก|ออสเตรีย|ไอร์แลนด์|0245|1, 0.5/1, 1
+ยูฟ่า เนชั่นส์ ลีก|สวีเดน|บอสเนีย|0245|1, 1/1.5, 1
+ยูฟ่า เนชั่นส์ ลีก|โรมาเนีย|โปแลนด์|0245|0.5, 0.5/1, 0.5
+ยูฟ่า เนชั่นส์ ลีก|ไอร์แลนด์เหนือ|ยูเครน|0245|0/0.5, เสมอ
+คิงส์ คัพ 2026|โอมาน|ทาจิกิสถาน|1600|0.5, 0/0.5, 0.5
+คิงส์ คัพ 2026|ทีมชาติไทย|บรูไน|1930|4/4.5, 4.5, 4.5/5
+กระชับมิตรทีมชาติ|ญี่ปุ่น|บราซิล|1715|0.5/1, 0.5
+กระชับมิตรทีมชาติ|จีน|มาเลเซีย|1900|0.5/1, 1
+กระชับมิตรทีมชาติ|ปาเลสไตน์|อิหร่าน|2200|1.5, 1/1.5
+คอนคาเคฟ เนชั่นส์ ลีก|เฮติ|สหรัฐอเมริกา|0430|1.5/2, 1.5
+คอนคาเคฟ เนชั่นส์ ลีก|จาเมก้า|เม็กซิโก|0800|0.5/1, 1
+ลีกวัน อังกฤษ|สต็อคพอร์ท|เร้ดดิ้ง|2200|0.5, 0.5/1, 0.5
+ลีกวัน อังกฤษ|เชฟฟิลด์ เว้นส์เดย์|พลีมัธ|2200|0/0.5, เสมอ, 0/0.5
+ลีกวัน อังกฤษ|มิลตัน คีนส์ ดอนส์|เบอร์ตัน อัลเบี้ยน|2200|1, 0.5/1
+ลีกทู อังกฤษ|เอ็กเซเตอร์|เชลท์แน่ม|1930|0/0.5, 0.5
+ลีกทู อังกฤษ|ซอลฟอร์ด ซิตี้|นอร์ทแธมป์ตัน|2200|0.5/1, 1, 0.5/1
+ลีกทู อังกฤษ|ครูว์|นิวพอร์ต เคาน์ตี้|2200|0.5, 0/0.5
+เนเธอร์แลนด์ เอร์สเตอ ดีวีซี|เอ็นเอซี เบรด้า|เอ็มเมน|2230|1, 1/1.5, 1
+ลาลีก้า 2 สเปน|เรอัล บายาโดลิด|คาสเตลล่อน|2000|0/0.5
+ลาลีก้า 2 สเปน|อัลเมเรีย|อันดอร์ร่า ซีเอฟ|0030|0.5/1, 1, 0.5/1
+บราซิล เซเรีย เอ|มิราสโซล|อัตเลติโก้ มิไนโร่|0430|เสมอ, 0/0.5, 0.5, 0/0.5
+บราซิล เซเรีย เอ|ชาเปโคเอนเซ่|วาสโก ดา กาม่า|0630|1, 1/1.5
+โคปา อาร์เจนติน่า|บานฟิลด์|โบค่า จูเนียร์|0500|0.5/1, 1
+ชิลี ลีกคัพ|โกคิมโบ ยูนิโด|โอ.ฮิกกิ้นส์|0430|0/0.5, 0.5
+เม็กซิโก ลีก้า เอ็มเอ็กซ์|กัวเรตาโร่|มอนเทอร์เรย์|0600|0/0.5, 0.5`.split('\n').map(l=>l.split('|'));
+function imp(){const t=h=>(+h.slice(0,2)<11?'2026-11-15':'2026-11-14')+'T'+h.slice(0,2)+':'+h.slice(2);let n=0;
+ G7.forEach(r=>{if(F.some(f=>f.h==r[1]&&f.a==r[2]))return;F.push({id:Date.now()+n++,lg:r[0],h:r[1],a:r[2],ko:t(r[3]),pick:'',mk:'AH (ราคาบนเว็บ): '+r[4],odds:'',fp:'',fo:'',ip:'',io:'',lu:'',src:'goal7.co (ดึง 14 พ.ย. 2569 ไม่ทราบเวลาตรวจราคา)',pt:'',cf:false})});
+ sv('nx_f',F);R=[];draw();alert('นำเข้า '+n+' คู่จาก goal7.co — ยังขาดฟอร์ม/ราคาทศนิยม/ข่าวเจ็บ จึงเป็น UNKNOWN → NO BET จนกว่าจะกรอกเพิ่ม')}
+let U='';
+async function auto(){try{const r=await fetch('fixtures.json',{cache:'no-store'});if(!r.ok)return;const d=await r.json();if(!d.updated||!d.fixtures.length)return;
+ U=new Date(d.updated).toLocaleString('th-TH',{timeZone:'Asia/Bangkok'});F=F.filter(f=>!f.auto);
+ d.fixtures.forEach((x,i)=>F.push({id:9e6+i,auto:true,lg:x.lg,h:x.h,a:x.a,ko:x.ko,pick:'',mk:'AH (ราคาบนเว็บ): '+(x.ah.join(', ')||'UNKNOWN'),odds:'',fp:'',fo:'',ip:'',io:'',lu:'',src:'goal7.co (อัปเดตไฟล์ '+U+')',pt:'',cf:false}));
+ sv('nx_f',F);R=[];draw()}catch(e){}}
+function addF(){const g=i=>$('#'+i).value.trim(),f={};['lg','h','a','ko','pick','mk','odds','fp','fo','ip','io','lu','src','pt'].forEach(k=>f[k]=g('i_'+k));f.cf=$('#i_cf').checked;f.id=Date.now();
+ if(!f.h||!f.a)return alert('กรอกชื่อทีมเหย้าและเยือน');F.push(f);sv('nx_f',F);R=[];draw()}
+function delF(id){F=F.filter(f=>f.id!=id);sv('nx_f',F);R=[];draw()}
+function demo(){const t=h=>new Date(Date.now()+h*36e5-new Date().getTimezoneOffset()*6e4).toISOString().slice(0,16);
+ F.push({id:1,lg:'DEMO',h:'ทีม A',a:'ทีม B',ko:t(6),pick:'ทีม A',mk:'AH -0.5',odds:'1.95',fp:'WWDWW',fo:'LDLLW',ip:'0',io:'2',lu:'yes',src:'DEMO',pt:t(0),cf:false},{id:2,lg:'DEMO',h:'ทีม C',a:'ทีม D',ko:t(8),pick:'ทีม C',mk:'1X2',odds:'1.80',fp:'DLWDL',fo:'WWWDW',ip:'2',io:'0',lu:'no',src:'DEMO',pt:t(0),cf:false});sv('nx_f',F);R=[];draw()}
+const fld=(i,l,t='text',ph='')=>'<div><label>'+l+'</label><input id="i_'+i+'" type="'+t+'" placeholder="'+ph+'"></div>';
+const VS=[['ov','OFFICE OVERVIEW'],['live','LIVE AGENT STATUS'],['scan','MATCH SCANNER'],['fb','FOOTBALL ANALYSIS'],['od','ODDS ANALYSIS'],['inj','INJURY & NEWS'],['meet','AI MEETING ROOM'],['risk','RISK CONTROL'],['rep','DAILY REPORT'],['his','REPORT HISTORY']];
+function T(h,rows){return '<div class="card"><div class="tw"><table><tr>'+h.map(x=>'<th>'+x+'</th>').join('')+'</tr>'+(rows.length?rows.map(r=>'<tr>'+r.map(c=>'<td>'+c+'</td>').join('')+'</tr>').join(''):'<tr><td colspan="9">ไม่มีข้อมูล (UNKNOWN) — กรอกข้อมูลที่ MATCH SCANNER แล้วกด VERIFY ALL DATA</td></tr>')+'</table></div></div>'}
+const ok=()=>R.filter(r=>r.total!==null);
+function draw(){$('#nav').innerHTML=VS.map(v=>'<button class="'+(V==v[0]?'on':'')+'" onclick="V=\''+v[0]+'\';draw()">'+v[1]+'</button>').join('');
+ const rm=a=>'<div class="room" onclick="info(\''+a.id+'\')"><div class="rn">'+a.room+'</div><div class="av">'+a.e+'</div><b>'+a.n+'</b><div><small>'+a.r+'</small></div><span class="st '+a.st.split(' ')[0]+'">'+a.st+'</span><div class="pg"><i style="width:'+a.p+'%"></i></div></div>';
+ let h='<div class="warn">'+(F.some(f=>/goal7/.test(f.src))?''+(U?'ข้อมูลจาก goal7.co อัปเดตอัตโนมัติ 08:00 น. (ไฟล์ล่าสุด '+U+')':'ข้อมูลจาก goal7.co เป็น snapshot ที่นำเข้าไว้ (ไม่ใช่ข้อมูลสด)')+' — ฟอร์ม ราคาทศนิยม และข่าวเจ็บต้องกรอกเพิ่ม ไม่สร้างสถิติ/ราคาเอง ผลเป็นการประมาณ ไม่รับประกันผล':'ระบบนี้ไม่ได้เชื่อมต่อแหล่งข้อมูลสด — ใช้เฉพาะข้อมูลที่กรอกหรือนำเข้า ไม่สร้างสถิติ/ราคาเอง ผลเป็นการประมาณ ไม่รับประกันผล')+'</div>';
+ if(V=='ov'||V=='live')h+='<div class="grid">'+AG.map(rm).join('')+'</div>'+(V=='live'?AG.map(a=>'<div class="card"><h3>'+a.n+'</h3><div class="log">'+(esc(a.l.join('\n'))||'ยังไม่มีบันทึก')+'</div></div>').join(''):'<div class="card" style="margin-top:12px"><h3>สรุปวันนี้</h3>คู่ในระบบ '+F.length+' | ผ่านเกณฑ์ '+elig().length+' | NO BET '+R.filter(r=>r.no).length+'<br><small>สแกนอัตโนมัติ 08:00 น. (เวลาไทย) ขณะเปิดหน้านี้ไว้</small></div>');
+ else if(V=='scan'){h+='<div class="card"><h3>เพิ่มคู่แข่งขัน (ข้อมูลจริงที่ตรวจสอบแล้ว)</h3><div class="f">'+fld('lg','ลีก')+fld('h','ทีมเหย้า')+fld('a','ทีมเยือน')+fld('ko','เวลาแข่ง','datetime-local')+fld('pick','ทีมที่เลือก')+fld('mk','ตลาด','text','AH -0.5 / O/U 2.5')+fld('odds','ราคา (ทศนิยม)','number','1.90')+fld('fp','ฟอร์ม 5 นัด ทีมที่เลือก','text','WWDLW')+fld('fo','ฟอร์ม 5 นัด คู่แข่ง','text','LDWLL')+fld('ip','ตัวหลักเจ็บ/แบน ทีมเลือก','number','0')+fld('io','ตัวหลักเจ็บ/แบน คู่แข่ง','number','0')+'<div><label>11 ตัวจริง</label><select id="i_lu"><option value="">UNKNOWN</option><option value="yes">ประกาศแล้ว</option><option value="no">ยังไม่ประกาศ</option></select></div>'+fld('src','แหล่งข้อมูล / ลิงก์')+fld('pt','เวลาตรวจราคา','datetime-local')+'<div><label>แหล่งข้อมูลขัดแย้ง?</label><input type="checkbox" id="i_cf" style="width:auto"> CONFLICT</div></div><p><button class="btn pri" onclick="addF()">+ เพิ่มคู่</button> <button class="btn pri" onclick="imp()">นำเข้าจาก goal7.co</button> <button class="btn" onclick="demo()">โหลดข้อมูลทดสอบ (DEMO)</button> <button class="btn" onclick="if(confirm(\'ล้างทั้งหมด?\')){F=[];R=[];sv(\'nx_f\',F);draw()}">ล้างทั้งหมด</button></p></div>'+T(['ลีก','คู่','เวลา','เลือก','ราคา','แหล่ง',''],F.map(f=>[esc(f.lg),esc(f.h+' vs '+f.a),esc((f.ko||'UNKNOWN').replace('T',' ')),esc(f.pick||'UNKNOWN'),esc(f.mk+(f.odds?' @ '+f.odds:'')),esc(f.src||'UNKNOWN'),'<button class="btn" onclick="delF('+f.id+')">ลบ</button>']))}
+ else if(V=='fb')h+=T(['คู่','แต้มฟอร์ม เลือก','แต้มฟอร์ม คู่แข่ง','คะแนน /30'],ok().map(r=>[nm(r),r.a+'/15',r.b+'/15',r.form.toFixed(1)]));
+ else if(V=='od')h+=T(['คู่','ตลาด @ ราคา','ราคาบอกโอกาส','ประมาณการ','ส่วนต่าง','คะแนน /25'],ok().map(r=>[nm(r),esc(r.f.mk+' @ '+r.f.odds),(r.ip*100).toFixed(0)+'%',(r.ep*100).toFixed(0)+'%',(r.val*100).toFixed(1)+'%',r.price.toFixed(1)]));
+ else if(V=='inj')h+=T(['คู่','เจ็บ/แบน เลือก','เจ็บ/แบน คู่แข่ง','11 ตัวจริง','คะแนน /20'],ok().map(r=>[nm(r),esc(r.f.ip||0),esc(r.f.io||0),{yes:'ประกาศแล้ว',no:'ยังไม่ประกาศ'}[r.f.lu]||'UNKNOWN',r.news]));
+ else if(V=='meet')h+='<div class="card"><h3>AI Meeting</h3>'+(MEET.length?MEET.map(m=>'<p><b>'+esc(m[0])+':</b> '+esc(m[1])+'</p>').join(''):'ยังไม่ประชุม — กด START AI MEETING')+'</div>';
+ else if(V=='risk')h+=T(['คู่','สถานะ','คะแนนความเสี่ยง /10','คะแนนรวม','ข้อควรระวัง'],R.map(r=>[nm(r),'<span class="tag '+(r.no?'D':r.grade[0]=='S'?'A':'B')+'">'+(r.no?'NO BET':r.grade)+'</span>',r.risk??'-',r.total??'-',esc(r.flags.join('; ')||'-')]));
+ else if(V=='rep'){h+='<div class="card">'+(REP?REP.h+'<p><button class="btn" onclick="navigator.clipboard&&navigator.clipboard.writeText($(\'.rep\').innerText)">คัดลอกรายงาน</button></p>':'ยังไม่มีรายงาน — กด GENERATE FINAL REPORT')+'</div>'}
+ else if(V=='his')h+=H.length?H.map((x,i)=>'<div class="card"><button class="btn" onclick="REP=H['+i+'];V=\'rep\';draw()">เปิดรายงาน '+esc(x.t)+'</button></div>').join(''):'<div class="card">ยังไม่มีประวัติรายงาน</div>';
+ $('#main').innerHTML=h}
+function info(id){const a=G(id),m=$('#md');m.innerHTML='<div class="card"><h3>'+a.e+' '+a.n+' — '+a.r+'</h3><span class="st '+a.st.split(' ')[0]+'">'+a.st+'</span><p><b>หน้าที่</b></p><ul>'+a.d.map(x=>'<li>'+x+'</li>').join('')+'</ul><b>บันทึกผลงาน</b><div class="log">'+(esc(a.l.join('\n'))||'ยังไม่มีผลงาน')+'</div><p><button class="btn" onclick="$(\'#md\').style.display=\'none\'">ปิด</button></p></div>';m.style.display='flex'}
+let last=ld('nx_last','');setInterval(()=>{const p=new Intl.DateTimeFormat('en-GB',{timeZone:'Asia/Bangkok',hour:'2-digit',minute:'2-digit',hour12:false,year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()),g=t=>p.find(x=>x.type==t).value,d=g('year')+g('month')+g('day');
+ $('#clk').textContent='เวลาไทย '+g('hour')+':'+g('minute')+' น.';if(g('hour')=='08'&&g('minute')=='00'&&last!=d){last=d;sv('nx_last',d);daily()}},5000);
+draw();auto();
+</script></body></html>
